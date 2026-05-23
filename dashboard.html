@@ -426,7 +426,7 @@
   }
 
   function fmt(d) {
-    try { return new Date(d).toLocaleString(); } catch(_) { return String(d); }
+    try { return new Date(d).toLocaleString('en-IN', { timeZone: 'Asia/Kolkata' }); } catch(_) { return String(d); }
   }
 
   /* ── Polling ── */
@@ -654,6 +654,10 @@
     // Behavioral Score — use liveness_score if available, else attrs
     const bs = log.liveness_score ?? attrs.behavioral_score ?? attrs.behaviour_score ?? null;
     rows.push({ label: 'Behavioral Score', val: bs != null ? Math.round(bs) : 80 });
+
+    // Face Match — show liveness_score as percentage if present
+    const fm = log.liveness_score ?? attrs.face_match_score ?? attrs.face_score ?? null;
+    rows.push({ label: 'Face Match', val: fm != null ? (Math.round(fm) + '%') : 'N/A' });
 
     return rows;
   }
