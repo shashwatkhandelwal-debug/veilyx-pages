@@ -681,11 +681,10 @@ async function startVerification() {
     const submitStart = Date.now();
     let nonce = 'demo_fallback'; try { const nonceRes = await fetch(BASE_URL + '/nonce', { headers: { 'X-API-Key': DEMO_KEY } }); if (nonceRes.ok) { const nonceData = await nonceRes.json(); nonce = nonceData.nonce; } } catch(e) {}
     const timestamp = new Date().toISOString();
-    let verificationId = 'demo_' + sessionId + '_' + verificationCount + '_' + Date.now();
 
     const proofPayload = {
       proof_payload: {
-        verification_id: verificationId,
+        verification_id: 'demo_' + sessionId + '_' + verificationCount + '_' + Date.now(),
         device_id: 'demo_device_iit_' + verificationCount,
         requested_by: 'Veilyx Demo',
         attributes_verified: {
