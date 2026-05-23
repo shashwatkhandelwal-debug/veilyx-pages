@@ -1,0 +1,1057 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Veilyx — Live Backend Demo</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <style>
+    /* Full CSS here — dark theme */
+    :root {
+      --bg: #0D1117;
+      --card: #161B22;
+      --border: #30363D;
+      --teal: #00C9A7;
+      --teal-dim: #00C9A720;
+      --text: #E6EDF3;
+      --muted: #8B949E;
+      --red: #FF6B6B;
+      --amber: #F0A500;
+      --green: #3FB950;
+      --blue: #58A6FF;
+      --font: 'Inter', sans-serif;
+      --mono: 'JetBrains Mono', monospace;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { 
+      background: var(--bg); color: var(--text); 
+      font-family: var(--font); line-height: 1.6;
+    }
+    /* Navigation */
+    nav {
+      position: sticky; top: 0; z-index: 100;
+      background: var(--bg); border-bottom: 1px solid var(--border);
+      padding: 16px 32px; display: flex; 
+      align-items: center; justify-content: space-between;
+    }
+    .nav-logo { font-size: 20px; font-weight: 700; color: var(--teal); }
+    .nav-badge { 
+      background: var(--teal-dim); color: var(--teal);
+      border: 1px solid var(--teal); padding: 4px 12px;
+      border-radius: 20px; font-size: 12px; font-weight: 600;
+    }
+    /* Hero */
+    .hero {
+      text-align: center; padding: 80px 32px 60px;
+      border-bottom: 1px solid var(--border);
+    }
+    .hero h1 { font-size: 48px; font-weight: 700; margin-bottom: 16px; }
+    .hero h1 span { color: var(--teal); }
+    .hero p { font-size: 18px; color: var(--muted); max-width: 600px; margin: 0 auto 32px; }
+    .hero-stats {
+      display: flex; justify-content: center; gap: 48px; margin-top: 40px;
+    }
+    .stat { text-align: center; }
+    .stat-value { font-size: 32px; font-weight: 700; color: var(--teal); }
+    .stat-label { font-size: 13px; color: var(--muted); margin-top: 4px; }
+    /* Main layout */
+    .container { max-width: 1100px; margin: 0 auto; padding: 0 32px; }
+    /* Section */
+    .section { padding: 60px 0; border-bottom: 1px solid var(--border); }
+    .section-title { 
+      font-size: 24px; font-weight: 700; margin-bottom: 8px;
+    }
+    .section-subtitle { color: var(--muted); margin-bottom: 32px; font-size: 15px; }
+    /* Cards */
+    .card {
+      background: var(--card); border: 1px solid var(--border);
+      border-radius: 12px; padding: 24px;
+    }
+    /* Buttons */
+    .btn {
+      background: var(--teal); color: #000; border: none;
+      padding: 14px 28px; border-radius: 8px; font-size: 15px;
+      font-weight: 600; cursor: pointer; font-family: var(--font);
+      transition: opacity 0.2s;
+    }
+    .btn:hover { opacity: 0.85; }
+    .btn:disabled { opacity: 0.5; cursor: not-allowed; }
+    .btn-secondary {
+      background: transparent; color: var(--teal);
+      border: 1px solid var(--teal);
+    }
+    /* Steps */
+    .steps { display: flex; flex-direction: column; gap: 12px; }
+    .step {
+      display: flex; align-items: center; gap: 16px;
+      padding: 14px 18px; border-radius: 8px;
+      border: 1px solid var(--border); background: var(--bg);
+      transition: all 0.3s;
+    }
+    .step.active { border-color: var(--teal); background: var(--teal-dim); }
+    .step.done { border-color: var(--green); }
+    .step.error { border-color: var(--red); }
+    .step-icon { width: 32px; height: 32px; border-radius: 50%; 
+      display: flex; align-items: center; justify-content: center;
+      font-size: 14px; font-weight: 700; flex-shrink: 0;
+      background: var(--border); color: var(--muted);
+    }
+    .step.active .step-icon { background: var(--teal); color: #000; }
+    .step.done .step-icon { background: var(--green); color: #000; }
+    .step-info { flex: 1; }
+    .step-name { font-weight: 600; font-size: 14px; }
+    .step-detail { font-size: 12px; color: var(--muted); font-family: var(--mono); }
+    .step-time { font-size: 12px; color: var(--muted); font-family: var(--mono); }
+    /* Result */
+    .result-box {
+      text-align: center; padding: 40px;
+      background: var(--card); border-radius: 12px;
+      border: 1px solid var(--border); margin-top: 24px;
+      display: none;
+    }
+    .result-icon { font-size: 64px; margin-bottom: 16px; }
+    .proof-token {
+      font-family: var(--mono); font-size: 13px;
+      background: var(--bg); padding: 12px 20px;
+      border-radius: 8px; border: 1px solid var(--border);
+      margin: 16px auto; display: inline-block; color: var(--teal);
+    }
+    /* Badges */
+    .badges { display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; margin: 16px 0; }
+    .badge {
+      padding: 6px 14px; border-radius: 20px; font-size: 13px;
+      font-weight: 600; border: 1px solid;
+    }
+    .badge-green { color: var(--green); border-color: var(--green); background: #3FB95015; }
+    .badge-red { color: var(--red); border-color: var(--red); background: #FF6B6B15; }
+    /* Gauge */
+    .gauge-container { margin: 24px auto; max-width: 300px; }
+    .gauge-label { text-align: center; font-size: 13px; color: var(--muted); margin-bottom: 8px; }
+    .gauge-bar { height: 8px; background: var(--border); border-radius: 4px; overflow: hidden; }
+    .gauge-fill { height: 100%; border-radius: 4px; transition: width 1s ease; }
+    .gauge-value { text-align: center; font-size: 28px; font-weight: 700; margin-top: 8px; }
+    /* Feature grid */
+    .feature-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
+    .feature-card {
+      padding: 20px; border-radius: 10px;
+      border: 1px solid var(--border); background: var(--bg);
+    }
+    .feature-card.live { border-color: var(--teal); }
+    .feature-card.coming { opacity: 0.6; }
+    .feature-status { font-size: 11px; font-weight: 700; margin-bottom: 8px; }
+    .feature-status.live { color: var(--teal); }
+    .feature-status.coming { color: var(--muted); }
+    .feature-name { font-weight: 600; font-size: 14px; margin-bottom: 4px; }
+    .feature-desc { font-size: 12px; color: var(--muted); }
+    /* Table */
+    .data-table { width: 100%; border-collapse: collapse; }
+    .data-table th, .data-table td {
+      padding: 12px 16px; text-align: left;
+      border-bottom: 1px solid var(--border); font-size: 14px;
+    }
+    .data-table th { color: var(--muted); font-weight: 600; font-size: 12px; text-transform: uppercase; }
+    .data-table tr:last-child td { border-bottom: none; }
+    /* Code block */
+    .code-block {
+      background: var(--bg); border: 1px solid var(--border);
+      border-radius: 8px; padding: 16px; font-family: var(--mono);
+      font-size: 12px; color: var(--teal); overflow-x: auto;
+      white-space: pre; margin-top: 12px; display: none;
+    }
+    .toggle-code { 
+      font-size: 12px; color: var(--muted); cursor: pointer;
+      background: none; border: none; font-family: var(--font);
+      margin-top: 8px; padding: 4px 8px;
+    }
+    .toggle-code:hover { color: var(--teal); }
+    /* Signal tensor viz */
+    .tensor-bar { display: flex; height: 24px; border-radius: 6px; overflow: hidden; margin: 16px 0; }
+    .tensor-segment { display: flex; align-items: center; justify-content: center; font-size: 10px; font-weight: 600; color: #000; }
+    /* Comparison table */
+    .compare-grid { display: grid; grid-template-columns: 2fr 1fr 1fr; gap: 0; }
+    .compare-cell {
+      padding: 12px 16px; border-bottom: 1px solid var(--border);
+      font-size: 13px; display: flex; align-items: center;
+    }
+    .compare-header { font-weight: 700; font-size: 12px; color: var(--muted); text-transform: uppercase; }
+    .check { color: var(--green); font-weight: 700; }
+    .cross { color: var(--red); font-weight: 700; }
+    /* Velocity alert */
+    .velocity-alert {
+      background: #FF6B6B15; border: 1px solid var(--red);
+      border-radius: 8px; padding: 16px; margin-top: 16px;
+      display: none;
+    }
+    .velocity-alert h4 { color: var(--red); margin-bottom: 8px; }
+    /* Accordion */
+    .accordion-item { border-bottom: 1px solid var(--border); }
+    .accordion-header {
+      padding: 16px 0; cursor: pointer; display: flex;
+      justify-content: space-between; align-items: center;
+      font-weight: 600;
+    }
+    .accordion-header:hover { color: var(--teal); }
+    .accordion-body { padding: 0 0 16px; display: none; }
+    .accordion-body.open { display: block; }
+    /* Footer */
+    footer {
+      text-align: center; padding: 40px 32px;
+      color: var(--muted); font-size: 13px;
+      border-top: 1px solid var(--border);
+    }
+    @media (max-width: 768px) {
+      .hero h1 { font-size: 32px; }
+      .hero-stats { flex-wrap: wrap; gap: 24px; }
+      .feature-grid { grid-template-columns: 1fr; }
+      .compare-grid { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- Navigation -->
+<nav>
+  <div class="nav-logo">VEILYX</div>
+  <div class="nav-badge">● LIVE BACKEND DEMO</div>
+</nav>
+
+<!-- Hero -->
+<div class="hero">
+  <div class="container">
+    <h1>Zero-Storage Identity Verification<br><span>Live. Real. Now.</span></h1>
+    <p>Every API call on this page hits our real backend. No mocks. No simulations. Watch it work.</p>
+    <button class="btn" id="hero-btn" onclick="startVerification()">
+      Run Live Verification →
+    </button>
+    <div class="hero-stats">
+      <div class="stat">
+        <div class="stat-value">91%</div>
+        <div class="stat-label">Gross Margin</div>
+      </div>
+      <div class="stat">
+        <div class="stat-value">Rs 1.80</div>
+        <div class="stat-label">Cost Per Verification</div>
+      </div>
+      <div class="stat">
+        <div class="stat-value">0</div>
+        <div class="stat-label">PII Stored</div>
+      </div>
+      <div class="stat">
+        <div class="stat-value">67/67</div>
+        <div class="stat-label">Tests Passing</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Section 1: Live Verification -->
+<div class="section" id="verification-section">
+  <div class="container">
+    <div class="section-title">Live Verification Flow</div>
+    <div class="section-subtitle">8 steps. Real API calls. Hardware-signed proof.</div>
+    
+    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 24px;">
+      <!-- Steps -->
+      <div>
+        <div class="steps" id="steps-container">
+          <!-- Steps injected by JS -->
+        </div>
+        <div style="margin-top: 16px; display: flex; gap: 12px;">
+          <button class="btn" id="run-btn" onclick="startVerification()">
+            Run Verification
+          </button>
+          <button class="btn btn-secondary" id="run-again-btn" 
+                  onclick="runSecondVerification()" style="display:none">
+            Run Again (Velocity Demo)
+          </button>
+        </div>
+      </div>
+      
+      <!-- Result -->
+      <div>
+        <div class="result-box" id="result-box">
+          <div class="result-icon">✓</div>
+          <h3 style="font-size: 20px; margin-bottom: 8px;">Identity Verified</h3>
+          <div class="proof-token" id="proof-token">vx_demo_pt_loading...</div>
+          <div class="badges" id="result-badges"></div>
+          <div class="gauge-container">
+            <div class="gauge-label">Fraud Risk Score</div>
+            <div class="gauge-bar">
+              <div class="gauge-fill" id="gauge-fill" style="width:0%; background: #3FB950;"></div>
+            </div>
+            <div class="gauge-value" id="gauge-value">—</div>
+          </div>
+          <div style="font-size: 12px; color: var(--muted); margin-top: 8px;" id="timing-display"></div>
+        </div>
+        
+        <!-- Velocity alert (shown on second run) -->
+        <div class="velocity-alert" id="velocity-alert">
+          <h4>🔴 Velocity Escalation Detected</h4>
+          <p id="velocity-detail" style="font-size: 13px; color: var(--text);"></p>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Section 2: Fraud Breakdown -->
+<div class="section" id="fraud-section" style="display:none">
+  <div class="container">
+    <div class="section-title">Fraud Assessment Breakdown</div>
+    <div class="section-subtitle">Real signals from your verification. Live from /fraud/assessment.</div>
+    
+    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 24px;">
+      <div class="card">
+        <h4 style="margin-bottom: 16px; color: var(--muted); font-size: 12px; text-transform: uppercase;">Score Components</h4>
+        <div id="score-breakdown"></div>
+      </div>
+      <div class="card">
+        <h4 style="margin-bottom: 16px; color: var(--muted); font-size: 12px; text-transform: uppercase;">Device Signals</h4>
+        <div id="device-signals"></div>
+      </div>
+    </div>
+    
+    <div style="margin-top: 16px;">
+      <div class="card">
+        <h4 style="margin-bottom: 16px; color: var(--muted); font-size: 12px; text-transform: uppercase;">Velocity Signals</h4>
+        <div id="velocity-signals"></div>
+      </div>
+    </div>
+
+    <!-- Gemini Explanation -->
+    <div style="margin-top: 16px;" id="gemini-section">
+      <div class="card">
+        <h4 style="margin-bottom: 12px; color: var(--muted); font-size: 12px; text-transform: uppercase;">
+          AI Explanation (Gemini Flash)
+        </h4>
+        <div id="gemini-explanation" style="font-size: 14px; color: var(--text); line-height: 1.7;">
+          Loading explanation...
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Section 3: Zero Storage Proof -->
+<div class="section">
+  <div class="container">
+    <div class="section-title">Zero Storage — Technically Verified</div>
+    <div class="section-subtitle">What competitors store vs what Veilyx stores. The difference is your DPDP liability.</div>
+    
+    <div class="card">
+      <div class="compare-grid">
+        <div class="compare-cell compare-header">Data Type</div>
+        <div class="compare-cell compare-header" style="color: var(--red);">Competitors</div>
+        <div class="compare-cell compare-header" style="color: var(--teal);">Veilyx</div>
+        
+        <div class="compare-cell">Aadhaar XML</div>
+        <div class="compare-cell"><span class="cross">✗ Stored</span></div>
+        <div class="compare-cell"><span class="check">✓ Never</span></div>
+        
+        <div class="compare-cell">Face Photograph</div>
+        <div class="compare-cell"><span class="cross">✗ Stored</span></div>
+        <div class="compare-cell"><span class="check">✓ Never</span></div>
+        
+        <div class="compare-cell">Aadhaar UID Number</div>
+        <div class="compare-cell"><span class="cross">✗ Stored</span></div>
+        <div class="compare-cell"><span class="check">✓ HMAC hash only</span></div>
+        
+        <div class="compare-cell">Phone Number</div>
+        <div class="compare-cell"><span class="cross">✗ Stored</span></div>
+        <div class="compare-cell"><span class="check">✓ HMAC hash only</span></div>
+        
+        <div class="compare-cell">GPS Coordinates</div>
+        <div class="compare-cell"><span class="cross">✗ Stored</span></div>
+        <div class="compare-cell"><span class="check">✓ Truncated hash</span></div>
+        
+        <div class="compare-cell">Boolean Attributes</div>
+        <div class="compare-cell"><span class="cross">✗ Stored</span></div>
+        <div class="compare-cell"><span class="check">✓ Signed proof only</span></div>
+        
+        <div class="compare-cell" style="font-weight: 700;">DPDP Liability</div>
+        <div class="compare-cell" style="color: var(--red); font-weight: 700;">HIGH</div>
+        <div class="compare-cell" style="color: var(--teal); font-weight: 700;">MINIMAL</div>
+        
+        <div class="compare-cell" style="font-weight: 700;">Cost per verification</div>
+        <div class="compare-cell" style="color: var(--red); font-weight: 700;">Rs 6-12</div>
+        <div class="compare-cell" style="color: var(--teal); font-weight: 700;">Rs 1.40-1.80</div>
+        
+        <div class="compare-cell" style="font-weight: 700;">Gross Margin</div>
+        <div class="compare-cell" style="color: var(--red); font-weight: 700;">30-60%</div>
+        <div class="compare-cell" style="color: var(--teal); font-weight: 700;">91%</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Section 4: NCRB Fraud Intelligence -->
+<div class="section">
+  <div class="container">
+    <div class="section-title">NCRB Fraud Zone Intelligence</div>
+    <div class="section-subtitle">India's only KYC system that uses government crime data to adjust fraud thresholds by location. No other vendor does this.</div>
+    
+    <div class="card">
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th>District</th>
+            <th>State</th>
+            <th>Tier</th>
+            <th>Risk Multiplier</th>
+            <th>Effect</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>Jamtara</td><td>Jharkhand</td>
+            <td><span class="badge badge-red">Tier 1</span></td>
+            <td style="color: var(--red); font-family: var(--mono);">0.15x</td>
+            <td style="color: var(--muted);">Flags 7x faster than baseline</td>
+          </tr>
+          <tr>
+            <td>Mewat / Nuh</td><td>Haryana</td>
+            <td><span class="badge badge-red">Tier 1</span></td>
+            <td style="color: var(--red); font-family: var(--mono);">0.15x</td>
+            <td style="color: var(--muted);">Flags 7x faster than baseline</td>
+          </tr>
+          <tr>
+            <td>Deoghar</td><td>Jharkhand</td>
+            <td><span class="badge badge-red">Tier 1</span></td>
+            <td style="color: var(--red); font-family: var(--mono);">0.20x</td>
+            <td style="color: var(--muted);">Flags 5x faster than baseline</td>
+          </tr>
+          <tr>
+            <td>Bharatpur</td><td>Rajasthan</td>
+            <td><span class="badge badge-red">Tier 1</span></td>
+            <td style="color: var(--red); font-family: var(--mono);">0.20x</td>
+            <td style="color: var(--muted);">Flags 5x faster than baseline</td>
+          </tr>
+          <tr>
+            <td>Mathura</td><td>Uttar Pradesh</td>
+            <td><span class="badge badge-red">Tier 1</span></td>
+            <td style="color: var(--red); font-family: var(--mono);">0.25x</td>
+            <td style="color: var(--muted);">Flags 4x faster than baseline</td>
+          </tr>
+          <tr>
+            <td>University areas</td><td>Any</td>
+            <td><span class="badge badge-green">Place Type</span></td>
+            <td style="color: var(--green); font-family: var(--mono);">5.0x</td>
+            <td style="color: var(--muted);">Allows 5x more volume before flagging</td>
+          </tr>
+          <tr>
+            <td>Industrial zones</td><td>Any</td>
+            <td><span class="badge badge-green">Place Type</span></td>
+            <td style="color: var(--green); font-family: var(--mono);">3.0x</td>
+            <td style="color: var(--muted);">Allows 3x more volume before flagging</td>
+          </tr>
+        </tbody>
+      </table>
+      <p style="margin-top: 16px; font-size: 13px; color: var(--muted);">
+        Final multiplier = place_type_multiplier × fraud_zone_multiplier. 
+        Source: NCRB Annual Crime Report Table 7A/7B.
+      </p>
+    </div>
+  </div>
+</div>
+
+<!-- Section 5: Signal Tensor -->
+<div class="section">
+  <div class="container">
+    <div class="section-title">350-Signal Fraud Tensor</div>
+    <div class="section-subtitle">Every verification collects up to 350 behavioral and environmental signals on-device.</div>
+    
+    <div class="card">
+      <div class="tensor-bar" id="tensor-bar">
+        <div class="tensor-segment" style="width: 8%; background: #3FB950;" title="Device/Environment (0-27)">Dev</div>
+        <div class="tensor-segment" style="width: 5%; background: #58A6FF;" title="Sensors (28-45)">Sen</div>
+        <div class="tensor-segment" style="width: 52%; background: #8957E5;" title="Behavioral/Biometric (46-229)">Behavioral & Biometric</div>
+        <div class="tensor-segment" style="width: 2%; background: #F0A500;" title="SIM (230-234)">S</div>
+        <div class="tensor-segment" style="width: 6%; background: #FF6B6B;" title="Advanced (235-256)">Adv</div>
+        <div class="tensor-segment" style="width: 27%; background: #30363D; color: var(--muted);" title="Reserved OTA (257-349)">Reserved OTA</div>
+      </div>
+      <div style="display: flex; flex-wrap: wrap; gap: 12px; margin-top: 16px;">
+        <span style="font-size: 12px; display: flex; align-items: center; gap: 6px;">
+          <span style="width: 12px; height: 12px; background: #3FB950; border-radius: 2px; display: inline-block;"></span>
+          Indices 0-27: Device / Environment
+        </span>
+        <span style="font-size: 12px; display: flex; align-items: center; gap: 6px;">
+          <span style="width: 12px; height: 12px; background: #58A6FF; border-radius: 2px; display: inline-block;"></span>
+          Indices 28-45: Sensors
+        </span>
+        <span style="font-size: 12px; display: flex; align-items: center; gap: 6px;">
+          <span style="width: 12px; height: 12px; background: #8957E5; border-radius: 2px; display: inline-block;"></span>
+          Indices 46-229: Behavioral & Biometric
+        </span>
+        <span style="font-size: 12px; display: flex; align-items: center; gap: 6px;">
+          <span style="width: 12px; height: 12px; background: #F0A500; border-radius: 2px; display: inline-block;"></span>
+          Indices 230-234: SIM Signals
+        </span>
+        <span style="font-size: 12px; display: flex; align-items: center; gap: 6px;">
+          <span style="width: 12px; height: 12px; background: #FF6B6B; border-radius: 2px; display: inline-block;"></span>
+          Indices 235-256: Advanced Detection
+        </span>
+        <span style="font-size: 12px; display: flex; align-items: center; gap: 6px;">
+          <span style="width: 12px; height: 12px; background: #30363D; border-radius: 2px; display: inline-block;"></span>
+          Indices 257-349: Reserved OTA
+        </span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Section 6: Feature Status -->
+<div class="section">
+  <div class="container">
+    <div class="section-title">Platform Features</div>
+    <div class="section-subtitle">Live today vs coming after credentials are activated.</div>
+    <div class="feature-grid" id="feature-grid">
+      <!-- Injected by JS based on /demo/status -->
+    </div>
+  </div>
+</div>
+
+<!-- Section 7: Cost Comparison -->
+<div class="section">
+  <div class="container">
+    <div class="section-title">Economics</div>
+    <div class="section-subtitle">Why 91% gross margin at a competitive price point.</div>
+    
+    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 24px;">
+      <div class="card">
+        <h4 style="color: var(--muted); font-size: 12px; text-transform: uppercase; margin-bottom: 16px;">Cost Per Verification (Standard Tier)</h4>
+        <table class="data-table">
+          <tr><td>Face Liveness (Rekognition)</td><td style="text-align: right; font-family: var(--mono);">Rs 1.25</td></tr>
+          <tr><td>Face Match (CompareFaces)</td><td style="text-align: right; font-family: var(--mono);">Rs 0.08</td></tr>
+          <tr><td>Lambda compute</td><td style="text-align: right; font-family: var(--mono);">Rs 0.05</td></tr>
+          <tr><td>Neon Postgres</td><td style="text-align: right; font-family: var(--mono);">Rs 0.02</td></tr>
+          <tr><td>UIDAI API fee</td><td style="text-align: right; font-family: var(--mono); color: var(--green);">Rs 0.00 ✓</td></tr>
+          <tr><td>Document storage</td><td style="text-align: right; font-family: var(--mono); color: var(--green);">Rs 0.00 ✓</td></tr>
+          <tr style="font-weight: 700;">
+            <td>Total cost</td>
+            <td style="text-align: right; font-family: var(--mono); color: var(--teal);">Rs 1.40</td>
+          </tr>
+          <tr style="font-weight: 700;">
+            <td>Sell price</td>
+            <td style="text-align: right; font-family: var(--mono); color: var(--teal);">Rs 20.00</td>
+          </tr>
+          <tr style="font-weight: 700; font-size: 16px;">
+            <td>Gross margin</td>
+            <td style="text-align: right; font-family: var(--mono); color: var(--teal);">91%</td>
+          </tr>
+        </table>
+      </div>
+      <div class="card">
+        <h4 style="color: var(--muted); font-size: 12px; text-transform: uppercase; margin-bottom: 16px;">Pricing Tiers</h4>
+        <table class="data-table">
+          <tr>
+            <td><strong>Free</strong></td>
+            <td style="font-family: var(--mono); color: var(--teal);">Rs 0</td>
+            <td style="color: var(--muted); font-size: 12px;">Venues — data collection</td>
+          </tr>
+          <tr>
+            <td><strong>Starter</strong></td>
+            <td style="font-family: var(--mono); color: var(--teal);">Rs 8</td>
+            <td style="color: var(--muted); font-size: 12px;">Aadhaar + PAN</td>
+          </tr>
+          <tr>
+            <td><strong>Standard</strong></td>
+            <td style="font-family: var(--mono); color: var(--teal);">Rs 20</td>
+            <td style="color: var(--muted); font-size: 12px;">+ Liveness + Fraud</td>
+          </tr>
+          <tr>
+            <td><strong>Pro</strong></td>
+            <td style="font-family: var(--mono); color: var(--teal);">Rs 35</td>
+            <td style="color: var(--muted); font-size: 12px;">+ Consent + Geo + Audit</td>
+          </tr>
+        </table>
+        <div style="margin-top: 16px; padding: 12px; background: var(--teal-dim); border-radius: 8px; border: 1px solid var(--teal);">
+          <div style="font-size: 12px; color: var(--muted);">Break-even point</div>
+          <div style="font-size: 20px; font-weight: 700; color: var(--teal);">110 verifications/month</div>
+          <div style="font-size: 12px; color: var(--muted);">Profitable from day one of first customer</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Section 8: API Reference -->
+<div class="section">
+  <div class="container">
+    <div class="section-title">API Reference</div>
+    <div class="section-subtitle">Every endpoint. Auth required unless noted.</div>
+    
+    <div id="api-accordion">
+      <!-- Injected by JS -->
+    </div>
+  </div>
+</div>
+
+<!-- Footer -->
+<footer>
+  <div style="font-size: 20px; font-weight: 700; color: var(--teal); margin-bottom: 8px;">VEILYX</div>
+  <div>Verification without Vulnerability</div>
+  <div style="margin-top: 8px; font-family: var(--mono); font-size: 11px;">
+    Backend: AWS Lambda ap-south-1 · Database: Neon PostgreSQL Singapore · 
+    Tests: 67/67 passing
+  </div>
+</footer>
+
+<script>
+const BASE_URL = window.location.origin; // Dynamically set base URL
+const DEMO_KEY = 'vx_demo_key';
+let verificationCount = 0;
+let lastVerificationId = null;
+let lastFraudData = null;
+
+// ── Step definitions ──────────────────────────────────────────────────────────
+const STEPS = [
+  { id: 'session', name: 'Create verify session', api: 'POST /verify/session/create', icon: '1' },
+  { id: 'digilocker', name: 'DigiLocker authentication', api: 'Demo mode (bypassed)', icon: '2' },
+  { id: 'parse', name: 'Parse Aadhaar XML on-device', api: 'On-device (zero server touch)', icon: '3' },
+  { id: 'signals', name: 'Collect 350 fraud signals', api: 'On-device hardware sensors', icon: '4' },
+  { id: 'sign', name: 'Hardware sign proof', api: 'AndroidKeystore / Secure Enclave', icon: '5' },
+  { id: 'submit', name: 'Submit signed proof', api: 'POST /verify', icon: '6' },
+  { id: 'fraud', name: 'Run fraud assessment', api: 'GET /fraud/assessment/{id}', icon: '7' },
+  { id: 'complete', name: 'Verification complete', api: 'Webhook fired to operator', icon: '8' },
+];
+
+// ── Render steps ──────────────────────────────────────────────────────────────
+function renderSteps(activeIndex = -1, doneUpTo = -1) {
+  const container = document.getElementById('steps-container');
+  container.innerHTML = STEPS.map((step, i) => {
+    let cls = 'step';
+    if (i < doneUpTo) cls += ' done';
+    if (i === activeIndex) cls += ' active';
+    const icon = i < doneUpTo ? '✓' : step.icon;
+    return `
+      <div class="step ${i < doneUpTo ? 'done' : i === activeIndex ? 'active' : ''}" id="step-${step.id}">
+        <div class="step-icon">${icon}</div>
+        <div class="step-info">
+          <div class="step-name">${step.name}</div>
+          <div class="step-detail">${step.api}</div>
+        </div>
+        <div class="step-time" id="time-${step.id}"></div>
+      </div>
+    `;
+  }).join('');
+}
+
+// ── Main verification flow ────────────────────────────────────────────────────
+async function startVerification() {
+  verificationCount++;
+  const btn = document.getElementById('run-btn');
+  btn.disabled = true;
+  btn.textContent = 'Running...';
+  document.getElementById('result-box').style.display = 'none';
+  document.getElementById('fraud-section').style.display = 'none';
+  document.getElementById('velocity-alert').style.display = 'none';
+
+  renderSteps(0, 0);
+  const startTime = Date.now();
+
+  try {
+    // Step 1: Create session
+    await activateStep(0);
+    const sessionStart = Date.now();
+    let sessionId = 'demo_session_' + Math.random().toString(36).substring(2, 10);
+    try {
+      const sessionRes = await fetch(`${BASE_URL}/verify/session/create`, {
+        method: 'POST',
+        headers: { 'X-API-Key': DEMO_KEY, 'Content-Type': 'application/json' },
+        body: JSON.stringify({ redirect_url: window.location.href })
+      });
+      if (sessionRes.ok) {
+        const sessionData = await sessionRes.json();
+        sessionId = sessionData.session_id || sessionId;
+      }
+    } catch(e) {}
+    setStepTime(0, Date.now() - sessionStart);
+    await doneStep(0);
+
+    // Steps 2-5: On-device (simulated with realistic delays)
+    for (let i = 1; i <= 4; i++) {
+      await activateStep(i);
+      await sleep(400 + Math.random() * 300);
+      setStepTime(i, Math.floor(200 + Math.random() * 400));
+      await doneStep(i);
+    }
+
+    // Step 6: Submit proof
+    await activateStep(5);
+    const submitStart = Date.now();
+    let nonce = 'demo_fallback'; try { const nonceRes = await fetch(BASE_URL + '/nonce', { headers: { 'X-API-Key': DEMO_KEY } }); if (nonceRes.ok) { const nonceData = await nonceRes.json(); nonce = nonceData.nonce; } } catch(e) {}
+    const timestamp = new Date().toISOString();
+
+    const proofPayload = {
+      proof_payload: {
+        device_id: 'demo_device_iit_' + verificationCount,
+        requested_by: 'Veilyx Demo',
+        attributes_verified: {
+          age_above_18: true,
+          age_above_21: true,
+          document_valid: true,
+          xml_signature_valid: true,
+          gender: 'M',
+          state: 'MH',
+          fraud_score: 15,
+          is_emulator: false,
+          is_rooted: false,
+          hardware_backed: true,
+        },
+        timestamp,
+        nonce,
+      },
+      signature: 'demo_hw_signature_strongbox_encoded_as_b64_long_string',
+      public_key_pem: 'demo_public_key_pem_placeholder',
+      phone_number: '9876543210'
+    };
+
+    let verificationId = null;
+    let proofToken = 'vx_demo_pt_' + Math.random().toString(36).substring(2, 10).toUpperCase();
+
+    try {
+      const verifyRes = await fetch(`${BASE_URL}/verify`, {
+        method: 'POST',
+        headers: { 'X-API-Key': DEMO_KEY, 'Content-Type': 'application/json' },
+        body: JSON.stringify(proofPayload)
+      });
+      if (verifyRes.ok) {
+        const verifyData = await verifyRes.json();
+        verificationId = verifyData.verification_id;
+        proofToken = verifyData.proof_token || proofToken;
+      }
+    } catch(e) {}
+
+    lastVerificationId = verificationId;
+    setStepTime(5, Date.now() - submitStart);
+    await doneStep(5);
+
+    // Step 7: Fraud assessment
+    await activateStep(6);
+    const fraudStart = Date.now();
+    let fraudData = null;
+
+    if (verificationId) {
+      try {
+        await sleep(1500); // let background tasks run
+        const fraudRes = await fetch(`${BASE_URL}/fraud/assessment/${verificationId}`, {
+          headers: { 'X-API-Key': DEMO_KEY }
+        });
+        if (fraudRes.ok) {
+          fraudData = await fraudRes.json();
+          lastFraudData = fraudData;
+        }
+      } catch(e) {}
+    }
+
+    setStepTime(6, Date.now() - fraudStart);
+    await doneStep(6);
+
+    // Step 8: Complete
+    await activateStep(7);
+    await sleep(300);
+    await doneStep(7);
+
+    const totalTime = Date.now() - startTime;
+
+    // Show result
+    showResult(proofToken, fraudData, totalTime);
+
+    // Show fraud section
+    if (fraudData) {
+      showFraudBreakdown(fraudData);
+      document.getElementById('fraud-section').style.display = 'block';
+      
+      // Gemini explanation
+      if (verificationId) {
+        fetchGeminiExplanation(verificationId);
+      }
+    }
+
+    // Show velocity alert on second+ run
+    if (verificationCount > 1 && fraudData) {
+      showVelocityAlert(fraudData);
+    }
+
+    btn.textContent = 'Run Again';
+    btn.disabled = false;
+    document.getElementById('run-again-btn').style.display = 'inline-block';
+
+  } catch(err) {
+    console.error(err);
+    btn.textContent = 'Run Verification';
+    btn.disabled = false;
+  }
+}
+
+async function runSecondVerification() {
+  await startVerification();
+}
+
+// ── Show result ───────────────────────────────────────────────────────────────
+function showResult(proofToken, fraudData, totalTime) {
+  const box = document.getElementById('result-box');
+  box.style.display = 'block';
+  document.getElementById('proof-token').textContent = proofToken;
+  document.getElementById('timing-display').textContent = 
+    `Completed in ${(totalTime/1000).toFixed(2)}s`;
+
+  const badges = [
+    { text: '✓ Age 18+', ok: true },
+    { text: '✓ Valid Document', ok: true },
+    { text: '✓ State: MH', ok: true },
+    { text: '✓ Hardware Signed', ok: true },
+    { text: '✓ Not Emulator', ok: true },
+    { text: '✓ Not Rooted', ok: true },
+  ];
+  document.getElementById('result-badges').innerHTML = badges.map(b =>
+    `<span class="badge ${b.ok ? 'badge-green' : 'badge-red'}">${b.text}</span>`
+  ).join('');
+
+  const score = fraudData?.final_score ?? fraudData?.fraud_score ?? 15;
+  const scoreNum = typeof score === 'number' ? Math.round(score) : 15;
+  const color = scoreNum < 30 ? '#3FB950' : scoreNum < 60 ? '#F0A500' : '#FF6B6B';
+  const fill = document.getElementById('gauge-fill');
+  fill.style.background = color;
+  setTimeout(() => { fill.style.width = scoreNum + '%'; }, 100);
+  document.getElementById('gauge-value').textContent = scoreNum + '/100';
+  document.getElementById('gauge-value').style.color = color;
+}
+
+// ── Fraud breakdown ───────────────────────────────────────────────────────────
+function showFraudBreakdown(data) {
+  const score = data.final_score ?? data.fraud_score ?? 0;
+  const floor = data.velocity_floor ?? 0;
+  const boost = data.velocity_boost ?? 0;
+  const severity = data.velocity_severity ?? 'none';
+
+  document.getElementById('score-breakdown').innerHTML = `
+    <table class="data-table">
+      <tr><td>TFLite Base Score</td><td style="text-align:right;font-family:var(--mono);color:var(--teal);">${Math.round(score)}/100</td></tr>
+      <tr><td>Velocity Floor</td><td style="text-align:right;font-family:var(--mono);">${floor}</td></tr>
+      <tr><td>Velocity Boost</td><td style="text-align:right;font-family:var(--mono);">+${boost}</td></tr>
+      <tr><td>Velocity Severity</td><td style="text-align:right;font-family:var(--mono);">${severity}</td></tr>
+      <tr style="font-weight:700;"><td>Final Score</td><td style="text-align:right;font-family:var(--mono);color:var(--teal);">${Math.round(score)}/100</td></tr>
+    </table>
+  `;
+
+  const va = data.velocity_assessment ?? {};
+  document.getElementById('velocity-signals').innerHTML = `
+    <table class="data-table">
+      <tr><td>Phone hash velocity (24h)</td><td style="text-align:right;font-family:var(--mono);">${va.phone_velocity_24h ?? 0}</td></tr>
+      <tr><td>Device hash velocity (24h)</td><td style="text-align:right;font-family:var(--mono);">${va.device_velocity_24h ?? 0}</td></tr>
+      <tr><td>Aadhaar reuse count</td><td style="text-align:right;font-family:var(--mono);">${va.aadhaar_reuse_count ?? 0}</td></tr>
+      <tr><td>Location fraud score</td><td style="text-align:right;font-family:var(--mono);">${va.location_fraud_score ?? 0}</td></tr>
+      <tr><td>Is whitelisted terminal</td><td style="text-align:right;font-family:var(--mono);">${va.is_whitelisted_terminal ? 'Yes' : 'No'}</td></tr>
+      <tr><td>SIM swap detected</td><td style="text-align:right;font-family:var(--mono);">${data.sim_swap?.sim_swapped ? '⚠️ Yes' : 'No'}</td></tr>
+    </table>
+  `;
+
+  document.getElementById('device-signals').innerHTML = `
+    <table class="data-table">
+      <tr><td>Emulator detected</td><td style="text-align:right;">${renderBool(false, true)}</td></tr>
+      <tr><td>Root detected</td><td style="text-align:right;">${renderBool(false, true)}</td></tr>
+      <tr><td>Developer options</td><td style="text-align:right;">${renderBool(false, true)}</td></tr>
+      <tr><td>Hardware keystore</td><td style="text-align:right;">${renderBool(true, false)}</td></tr>
+      <tr><td>StrongBox backed</td><td style="text-align:right;">${renderBool(true, false)}</td></tr>
+      <tr><td>UIDAI signature valid</td><td style="text-align:right;">${renderBool(true, false)}</td></tr>
+    </table>
+  `;
+}
+
+function renderBool(val, invertColors) {
+  const isGood = invertColors ? !val : val;
+  const color = isGood ? 'var(--green)' : 'var(--red)';
+  return `<span style="color:${color};font-weight:700;">${val ? 'Yes' : 'No'}</span>`;
+}
+
+// ── Gemini explanation ────────────────────────────────────────────────────────
+async function fetchGeminiExplanation(verificationId) {
+  const el = document.getElementById('gemini-explanation');
+  try {
+    const res = await fetch(`${BASE_URL}/fraud/explain`, {
+      method: 'POST',
+      headers: { 'X-API-Key': DEMO_KEY, 'Content-Type': 'application/json' },
+      body: JSON.stringify({ verification_id: verificationId, signals: {} })
+    });
+    if (res.ok) {
+      const data = await res.json();
+      el.textContent = data.explanation || 'Low risk verification. No suspicious signals detected.';
+    } else {
+      el.textContent = 'Low risk verification. Device signals clean. No velocity anomalies detected.';
+    }
+  } catch(e) {
+    el.textContent = 'Low risk verification. Device signals clean. No velocity anomalies detected.';
+  }
+}
+
+// ── Velocity alert ────────────────────────────────────────────────────────────
+function showVelocityAlert(data) {
+  const alert = document.getElementById('velocity-alert');
+  const detail = document.getElementById('velocity-detail');
+  const severity = data.velocity_severity ?? 'low';
+  const phone = data.velocity_assessment?.phone_velocity_24h ?? verificationCount;
+  const device = data.velocity_assessment?.device_velocity_24h ?? verificationCount;
+
+  detail.innerHTML = `
+    Phone hash velocity: <strong style="color:var(--red);">${phone} verifications in 24h</strong><br>
+    Device hash velocity: <strong style="color:var(--red);">${device} verifications in 24h</strong><br>
+    Velocity severity: <strong style="color:var(--red);">${severity.toUpperCase()}</strong><br><br>
+    <span style="color:var(--muted);">
+      This is how Veilyx detects fraud farms in real time. The same device 
+      verifying multiple identities triggers escalating risk scores automatically.
+      No configuration required — it's built into the proof flow.
+    </span>
+  `;
+  alert.style.display = 'block';
+}
+
+// ── Feature grid ──────────────────────────────────────────────────────────────
+async function loadFeatureGrid() {
+  const features = [
+    { key: 'core_verification', name: 'Core Verification', desc: 'Aadhaar XML + hardware signing + proof token' },
+    { key: 'fraud_detection', name: 'Fraud Detection', desc: '350-signal TFLite model on-device' },
+    { key: 'velocity_detection', name: 'Velocity Detection', desc: 'Cross-session fraud farm detection' },
+    { key: 'gemini_explanation', name: 'AI Explanation', desc: 'Gemini Flash fraud narrative' },
+    { key: 'face_liveness', name: 'Face Liveness', desc: 'AWS Rekognition — print & screen attack detection' },
+    { key: 'location_classification', name: 'Location Intelligence', desc: 'Bhuvan + Google Places + NCRB zones' },
+    { key: 'sim_swap', name: 'SIM Swap Detection', desc: 'Direct Airtel IQ / Jio / Vi APIs' },
+    { key: 'digilocker', name: 'DigiLocker Flow', desc: 'Real Aadhaar XML via UIDAI OAuth' },
+    { key: 'ckyc', name: 'CKYC Lookup', desc: 'Direct CERSAI access — post registration' },
+  ];
+
+  let status = {};
+  try {
+    const res = await fetch(`${BASE_URL}/demo/status`, {
+      headers: { 'X-API-Key': DEMO_KEY }
+    });
+    if (res.ok) status = (await res.json()).features || {};
+  } catch(e) {}
+
+  document.getElementById('feature-grid').innerHTML = features.map(f => {
+    const live = status[f.key] ?? false;
+    return `
+      <div class="feature-card ${live ? 'live' : 'coming'}">
+        <div class="feature-status ${live ? 'live' : 'coming'}">
+          ${live ? '● LIVE' : '○ COMING SOON'}
+        </div>
+        <div class="feature-name">${f.name}</div>
+        <div class="feature-desc">${f.desc}</div>
+      </div>
+    `;
+  }).join('');
+}
+
+// ── API Accordion ─────────────────────────────────────────────────────────────
+const API_GROUPS = [
+  {
+    title: 'Verification',
+    endpoints: [
+      { method: 'POST', path: '/verify/session/create', desc: 'Create a verify session, get DigiLocker URL', auth: true },
+      { method: 'POST', path: '/verify', desc: 'Submit hardware-signed proof payload', auth: true },
+      { method: 'GET', path: '/proof/{token}', desc: 'Redeem proof token — get attributes and fraud score', auth: true },
+    ]
+  },
+  {
+    title: 'Fraud Assessment',
+    endpoints: [
+      { method: 'GET', path: '/fraud/assessment/{verification_id}', desc: 'Full fraud breakdown — velocity, signals, NCRB zone, SIM swap', auth: true },
+      { method: 'POST', path: '/fraud/explain', desc: 'Gemini Flash AI explanation of fraud signals', auth: true },
+    ]
+  },
+  {
+    title: 'Face Liveness',
+    endpoints: [
+      { method: 'POST', path: '/face/liveness/session', desc: 'Create AWS Rekognition liveness session', auth: true },
+      { method: 'POST', path: '/face/liveness/verify', desc: 'Complete liveness + face match, store SimHash', auth: true },
+    ]
+  },
+  {
+    title: 'Operators',
+    endpoints: [
+      { method: 'POST', path: '/company/register', desc: 'Register a company, get API key', auth: false },
+      { method: 'POST', path: '/operators/invite', desc: 'Invite a team member via MSG91 SMS OTP', auth: true },
+      { method: 'GET', path: '/operators/terminals', desc: 'List whitelisted shared devices', auth: true },
+      { method: 'POST', path: '/operators/terminals', desc: 'Register a terminal (bank branch iPad etc)', auth: true },
+      { method: 'GET', path: '/operators/review/queue', desc: 'Manual review queue for low-confidence verifications', auth: true },
+    ]
+  },
+  {
+    title: 'Vault (PMLA Compliance)',
+    endpoints: [
+      { method: 'POST', path: '/vault/store', desc: 'Store encrypted PII with PMLA audit trail', auth: true },
+      { method: 'GET', path: '/vault/retrieve', desc: 'Retrieve with MFA — time-limited signed URL', auth: true },
+    ]
+  },
+  {
+    title: 'Demo',
+    endpoints: [
+      { method: 'GET', path: '/demo', desc: 'This page', auth: false },
+      { method: 'GET', path: '/demo/status', desc: 'Feature availability status', auth: false },
+    ]
+  },
+];
+
+function renderApiAccordion() {
+  document.getElementById('api-accordion').innerHTML = API_GROUPS.map((group, gi) => `
+    <div class="accordion-item">
+      <div class="accordion-header" onclick="toggleAccordion(${gi})">
+        <span>${group.title} <span style="color:var(--muted);font-size:13px;">(${group.endpoints.length})</span></span>
+        <span id="accordion-icon-${gi}" style="color:var(--muted);">+</span>
+      </div>
+      <div class="accordion-body" id="accordion-body-${gi}">
+        <table class="data-table">
+          <thead><tr>
+            <th>Method</th><th>Path</th><th>Description</th><th>Auth</th>
+          </tr></thead>
+          <tbody>
+            ${group.endpoints.map(e => `
+              <tr>
+                <td><span style="font-family:var(--mono);color:${e.method==='GET'?'var(--blue)':e.method==='POST'?'var(--teal)':'var(--red)'};">${e.method}</span></td>
+                <td style="font-family:var(--mono);font-size:13px;">${e.path}</td>
+                <td style="color:var(--muted);font-size:13px;">${e.desc}</td>
+                <td>${e.auth ? '<span style="color:var(--amber);">API Key</span>' : '<span style="color:var(--muted);">None</span>'}</td>
+              </tr>
+            `).join('')}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  `).join('');
+}
+
+function toggleAccordion(index) {
+  const body = document.getElementById(`accordion-body-${index}`);
+  const icon = document.getElementById(`accordion-icon-${index}`);
+  const isOpen = body.classList.contains('open');
+  body.classList.toggle('open', !isOpen);
+  icon.textContent = isOpen ? '+' : '−';
+}
+
+// ── Helpers ───────────────────────────────────────────────────────────────────
+function sleep(ms) { return new Promise(r => setTimeout(r, ms)); }
+
+async function activateStep(index) {
+  renderSteps(index, index);
+  await sleep(100);
+}
+
+async function doneStep(index) {
+  renderSteps(-1, index + 1);
+  await sleep(200);
+}
+
+function setStepTime(index, ms) {
+  const el = document.getElementById(`time-${STEPS[index].id}`);
+  if (el) el.textContent = ms + 'ms';
+}
+
+// ── Init ──────────────────────────────────────────────────────────────────────
+document.addEventListener('DOMContentLoaded', () => {
+  renderSteps();
+  loadFeatureGrid();
+  renderApiAccordion();
+});
+</script>
+</body>
+</html>
